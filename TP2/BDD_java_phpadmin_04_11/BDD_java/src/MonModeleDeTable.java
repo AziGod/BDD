@@ -90,9 +90,11 @@ public class MonModeleDeTable extends AbstractTableModel{
 
 		try {
 			
+			String intitule = value.toString();
+			
 			//Condition pour ne pas ajouter si l'intitule existe déjà
 	        PreparedStatement checkStatement = connexion.prepareStatement("SELECT COUNT(*) FROM SPORT WHERE INTITULE = ?");
-	        checkStatement.setString(1, (String)value);
+	        checkStatement.setString(1, intitule);
 	        ResultSet resultSet = checkStatement.executeQuery();
 	        if (resultSet.next() && resultSet.getInt(1) > 0) {
 	            JOptionPane.showMessageDialog(null, "L'intitulé existe déjà dans la base de données.", "Erreur", JOptionPane.ERROR_MESSAGE);
@@ -100,16 +102,22 @@ public class MonModeleDeTable extends AbstractTableModel{
 	        }
 
 	        
+	        // Vérification si l'intitulé commence par une majuscule
+	        if (!Character.isUpperCase(intitule.charAt(0))) {
+	            JOptionPane.showMessageDialog(null, "L'intitulé doit commencer par une majuscule.", "Erreur", JOptionPane.ERROR_MESSAGE);
+	            return;
+	        }
+	        
 	        
 			PreparedStatement requetePreparee = connexion.prepareStatement("UPDATE SPORT SET INTITULE = ? WHERE CODE_SPORT = ?");
-			requetePreparee.setString(1, (String)value);
+			requetePreparee.setString(1, intitule);
 			requetePreparee.setString(2, codes.get(row));
 
 			// on lance la requête
 			int ret=requetePreparee.executeUpdate();
 			
 			System.out.println("Modification réussie : "+ret);
-			intitules.set(row, (String) value);
+			intitules.set(row, intitule);
 			fireTableCellUpdated(row, col);
 
 		} catch (SQLException c) {
@@ -131,6 +139,11 @@ public class MonModeleDeTable extends AbstractTableModel{
 	        }
 			
 			
+	        // Vérification si l'intitulé commence par une majuscule
+	        if (!Character.isUpperCase(intitule.charAt(0))) {
+	            JOptionPane.showMessageDialog(null, "L'intitulé doit commencer par une majuscule.", "Erreur", JOptionPane.ERROR_MESSAGE);
+	            return;
+	        }
 	        
 			PreparedStatement requetePreparee = connexion.prepareStatement("INSERT INTO SPORT(INTITULE) VALUES (?)");
 			requetePreparee.setString(1, intitule);
@@ -149,6 +162,21 @@ public class MonModeleDeTable extends AbstractTableModel{
 		}
 		
     }
+	public void deleteRow(String intitule) {
+		try {
+
+			PreparedStatement requetePreparee = connexion.prepareStatement("DELETE FROM SPORT WHERE INTITULE = (?)");
+			requetePreparee.setString(1,intitule); 
+			
+
+			// on lance la requête
+			requetePreparee.executeUpdate();
+			System.out.println("Suppresion réussie");
+
+		} catch (SQLException c) {
+			System.out.println("Problème lors de la suppresion du sport: " + c);
+		}
+	}
 
 	
 
